@@ -1,0 +1,30 @@
+First, Let's do following: 
+
+1. create a repo - I already have a data & docs folder. 
+2. I guess, we should create api endpoints in following manner:
+   2.1. UnDQ/transcript/engine/: this is an end to end api, it will read entire csv and will invoke all below apis and will generate a final result of solution. Input will be a csv for now - later we will scale it to big table, Output will be a json.
+Output:
+{
+"understanding":{
+    "Profile": <>,
+    "Rules": <>,
+},
+"execution":{
+    "Observed_Results": <>,
+},
+"business_impact":{
+    "scores": <>,
+    "evidences": <>,
+    "impact_insights": <>,
+},
+}
+   2.2. UnDQ/transcript/understanding/profiling: this will read the csv data and will give a schema analysis, statistical analysis, domain categorization, data quality signals and metadata knowledge base. Input will be 
+
+
+|
+|
+|
+
+so on.. till business impact layer - this will be given to users such that they can use it for UI or whatever.
+
+For now let's build apis that gives a message - "this is working & so on"..

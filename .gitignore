@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+outputs/*
+!outputs/.gitkeep
+data/*.csv
+data/*.xlsx
+!data/README.md
+docs/RnD/*
+data/*
+docs/*.txt
+tests/*
+archive/*
