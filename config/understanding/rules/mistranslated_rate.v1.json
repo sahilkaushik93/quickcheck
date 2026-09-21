@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "mistranslated_rate",
+  "version": "2.0.0",
+  "check_name": "mistranslated_rate",
+  "title": "Suspected mistranslation rate",
+  "description": "Measures approved domain-specific ASR substitutions and suspected mistranslated terms.",
+  "dimension": "accuracy",
+  "severity": "medium",
+  "level": "column",
+  "lifecycle": "approved",
+  "enabled": true,
+  "owner": "Language Analytics Owner",
+  "execution_handler": "mistranslated_rate",
+  "execution_strategy": "streaming_row",
+  "selector": {"column_name_patterns": ["^(trnscr_(clean_read_)?tx|transcript(_text)?)$"], "minimum_domain_confidence": 0.45, "match_mode": "any"},
+  "required_capabilities": ["execution.transcript_stream", "execution.mistranslation_lexicon"],
+  "parameters": {
+    "lexicon_reference": {"parameter_type": "string", "description": "Logical reference to an approved versioned confusion lexicon.", "required": true, "default": "mvp-domain-confusions:v1"},
+    "maximum_mistranslated_rate": {"parameter_type": "number", "description": "Maximum acceptable suspected-mistranslation rate.", "required": true, "default": 0.02, "minimum": 0.0, "maximum": 1.0},
+    "case_sensitive": {"parameter_type": "boolean", "description": "Whether lexicon matching is case-sensitive.", "required": true, "default": false}
+  },
+  "evidence_policy": {"max_evidence_items": 10, "include_aggregate_metrics": true, "include_raw_values": false, "include_transcript_text": false, "redact_matches": true},
+  "business_dimensions": ["transcription_accuracy", "intent_reliability"],
+  "tags": ["mvp", "mistranslation", "asr"],
+  "suggested_by_llm": false,
+  "approved_by": "DQ Governance MVP"
+}

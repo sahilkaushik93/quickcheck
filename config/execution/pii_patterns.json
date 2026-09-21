@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_pii_patterns_mvp",
+  "description": "Deterministic POC detectors. Only aggregate counts and redacted evidence may leave the handler.",
+  "normalization": {
+    "unicode_normalization": "NFKC",
+    "case_sensitive": false
+  },
+  "categories": {
+    "email": {
+      "enabled": true,
+      "patterns": ["(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(?![A-Za-z0-9.-])"],
+      "validator": "none"
+    },
+    "phone": {
+      "enabled": true,
+      "patterns": ["(?<!\\d)(?:\\+?1[-.\\s]?)?(?:\\(?\\d{3}\\)?[-.\\s]?)\\d{3}[-.\\s]?\\d{4}(?!\\d)"],
+      "validator": "digit_count"
+    },
+    "payment_card": {
+      "enabled": true,
+      "patterns": ["(?<!\\d)(?:\\d[ -]?){13,19}(?!\\d)"],
+      "validator": "luhn"
+    },
+    "us_ssn": {
+      "enabled": true,
+      "patterns": ["(?<!\\d)\\d{3}-\\d{2}-\\d{4}(?!\\d)"],
+      "validator": "ssn_structure"
+    },
+    "date_of_birth": {
+      "enabled": true,
+      "patterns": ["(?i)\\b(?:dob|date\\s+of\\s+birth|born)\\s*(?:is|:|-)?\\s*(?:0?[1-9]|1[0-2])[/-](?:0?[1-9]|[12]\\d|3[01])[/-](?:19|20)\\d{2}\\b"],
+      "validator": "none"
+    },
+    "membership_number": {
+      "enabled": false,
+      "patterns": [],
+      "validator": "organization_supplied",
+      "disabled_reason": "An approved organization-specific format has not been supplied."
+    }
+  },
+  "thresholds": {
+    "maximum_record_rate_default": 0.0,
+    "minimum_candidate_digits": 7
+  },
+  "false_positive_controls": {
+    "ignore_dates": true,
+    "ignore_durations": true,
+    "ignore_known_redaction_markers": true,
+    "redaction_markers": ["[redacted]", "<redacted>", "***"]
+  },
+  "evidence": {
+    "store_matches": false,
+    "store_context": false,
+    "store_transcript": false,
+    "retain_row_fingerprint": true,
+    "retain_category_counts": true,
+    "redact_all_matches": true
+  },
+  "governance": {
+    "owner": "Privacy and Data Security",
+    "version": "1.0.0",
+    "production_review_required": true
+  }
+}

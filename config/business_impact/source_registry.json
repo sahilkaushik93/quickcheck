@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "undq-approved-public-source-registry",
+  "registry_version": "1.0.0",
+  "global_limits": {
+    "connect_timeout_seconds": 10,
+    "read_timeout_seconds": 20,
+    "maximum_retries": 2,
+    "backoff_seconds": [0.5, 2.0],
+    "maximum_response_bytes": 2000000,
+    "maximum_documents_per_connector": 10,
+    "maximum_passages_per_document": 3,
+    "maximum_passage_characters": 2000,
+    "requests_per_minute_per_connector": 12,
+    "deduplicate_by": ["canonical_url", "content_sha256"],
+    "reject_redirect_to_unapproved_host": true
+  },
+  "sources": [
+    {
+      "source_id": "sec",
+      "connector_id": "sec",
+      "publisher": "U.S. Securities and Exchange Commission",
+      "allowed_hosts": ["www.sec.gov", "sec.gov"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/Archives/edgar/", "/ixviewer/", "/news/", "/rules/", "/files/"],
+      "allowed_document_types": ["filing", "rule", "press_release", "guidance"],
+      "trust_tier": "primary_authority"
+    },
+    {
+      "source_id": "american_express_investor_relations",
+      "connector_id": "amex_investor_relations",
+      "publisher": "American Express Investor Relations",
+      "allowed_hosts": ["ir.americanexpress.com", "www.americanexpress.com", "americanexpress.com"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/", "/en-us/company/"],
+      "allowed_document_types": ["earnings_release", "filing", "investor_presentation", "annual_report", "news_release"],
+      "trust_tier": "primary_corporate"
+    },
+    {
+      "source_id": "cfpb",
+      "connector_id": "cfpb",
+      "publisher": "Consumer Financial Protection Bureau",
+      "allowed_hosts": ["www.consumerfinance.gov", "consumerfinance.gov"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/about-us/", "/compliance/", "/rules-policy/", "/data-research/", "/enforcement/", "/consumer-tools/"],
+      "allowed_document_types": ["rule", "guidance", "report", "press_release", "consumer_advisory"],
+      "trust_tier": "primary_authority"
+    },
+    {
+      "source_id": "federal_reserve",
+      "connector_id": "federal_reserve",
+      "publisher": "Board of Governors of the Federal Reserve System",
+      "allowed_hosts": ["www.federalreserve.gov", "federalreserve.gov"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/supervisionreg/", "/newsevents/", "/publications/", "/paymentsystems/"],
+      "allowed_document_types": ["guidance", "report", "press_release", "policy_statement"],
+      "trust_tier": "primary_authority"
+    },
+    {
+      "source_id": "occ",
+      "connector_id": "occ",
+      "publisher": "Office of the Comptroller of the Currency",
+      "allowed_hosts": ["www.occ.gov", "occ.gov"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/news-issuances/", "/topics/", "/publications-and-resources/", "/news-issuances/bulletins/"],
+      "allowed_document_types": ["bulletin", "guidance", "report", "press_release"],
+      "trust_tier": "primary_authority"
+    },
+    {
+      "source_id": "ftc",
+      "connector_id": "ftc",
+      "publisher": "Federal Trade Commission",
+      "allowed_hosts": ["www.ftc.gov", "ftc.gov"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/business-guidance/", "/news-events/", "/legal-library/", "/policy-notices/"],
+      "allowed_document_types": ["guidance", "policy_statement", "report", "press_release"],
+      "trust_tier": "primary_authority"
+    },
+    {
+      "source_id": "federal_register",
+      "connector_id": "federal_register",
+      "publisher": "Federal Register",
+      "allowed_hosts": ["www.federalregister.gov", "federalregister.gov"],
+      "allowed_schemes": ["https"],
+      "allowed_path_prefixes": ["/documents/", "/agencies/"],
+      "allowed_document_types": ["proposed_rule", "final_rule", "notice"],
+      "trust_tier": "primary_authority"
+    }
+  ]
+}

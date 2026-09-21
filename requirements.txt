@@ -1,6 +1,11 @@
 fastapi==0.115.12
 uvicorn[standard]==0.34.2
 python-multipart==0.0.20
-pydantic==2.11.4
+# Pydantic 2.12 adds Python 3.14 support and compatible pydantic-core wheels.
+pydantic==2.12.5
 pytest==8.3.5
 httpx==0.28.1
+pandas>=2.2,<3.0
+openpyxl>=3.1,<4.0
+python-dotenv>=1.0,<2.0
+streamlit>=1.39,<2.0

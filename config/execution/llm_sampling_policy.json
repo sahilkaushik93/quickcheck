@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_llm_sampling_v1",
+  "enabled_by_default": false,
+  "maximum_samples": 24,
+  "maximum_samples_per_stratum": 4,
+  "maximum_characters_per_sample": 1200,
+  "maximum_prompt_characters": 40000,
+  "stratify_by": ["interaction_direction", "time_month"],
+  "redact_pii_before_prompt": true,
+  "single_request_only": true,
+  "temperature": 0,
+  "required_output_keys": [
+    "language_assessment",
+    "speaker_tag_assessment",
+    "spelling_assessment",
+    "mistranscription_assessment",
+    "topic_assessment",
+    "business_inference",
+    "limitations"
+  ]
+}

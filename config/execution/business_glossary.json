@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "config_id": "lumi_transcript_business_glossary_mvp",
+  "description": "Small extensible allowlist for deterministic transcript spelling assessment.",
+  "normalization": {
+    "case_sensitive": false,
+    "unicode_normalization": "NFKC",
+    "collapse_whitespace": true
+  },
+  "terms": [
+    "american express",
+    "amex",
+    "cardmember",
+    "card member",
+    "merchant",
+    "membership rewards",
+    "annual fee",
+    "credit limit",
+    "statement balance",
+    "minimum payment",
+    "one-time password"
+  ],
+  "acronyms": ["apr", "atm", "cvv", "ivr", "otp", "pin", "sms"],
+  "product_terms": [],
+  "organization_terms": [],
+  "governance": {
+    "owner": "Business Data Steward",
+    "version": "1.0.0",
+    "production_review_required": true,
+    "accept_llm_suggestions_automatically": false
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "undq-business-impact-disclosure-policy",
+  "policy_version": "1.0.0",
+  "internal_fact_pack": {
+    "allowed_content": ["aggregate_metrics", "redacted_evidence_categories", "rule_ids", "period_labels", "approved_dimension_labels", "deterministic_score_outputs", "governed_business_context"],
+    "forbidden_content": ["complete_transcript", "raw_source_row", "raw_pii_match", "identifier_value", "credential", "request_header", "internal_system_name", "dataset_name", "column_name", "source_path", "salt_value", "connector_configuration"],
+    "forbidden_key_patterns": ["(?i)transcript", "(?i)raw", "(?i)pii", "(?i)email", "(?i)phone", "(?i)ssn", "(?i)card", "(?i)account", "(?i)customer", "(?i)identifier", "(?i)password", "(?i)token", "(?i)secret", "(?i)header", "(?i)path", "(?i)column", "(?i)dataset", "(?i)system"],
+    "maximum_serialized_bytes": 131072,
+    "overflow_behavior": "reject_and_return_partial"
+  },
+  "external_connector_boundary": {
+    "external_connectors_receive": ["approved_generic_research_topic", "approved_source_id", "connector_limit_controls"],
+    "external_connectors_must_not_receive": ["internal_fact_pack", "metrics", "percentages", "source_names", "project_names", "control_findings", "user_urls", "llm_urls"],
+    "enforcement": "query_guard_required_before_every_request"
+  },
+  "human_review_triggers": [
+    "privacy_detection_observed",
+    "critical_deterministic_score_band",
+    "assessment_confidence_below_0_6",
+    "external_regulatory_claim",
+    "novel_impact_mapping",
+    "llm_recommendation_not_in_catalogue",
+    "citation_validation_failure",
+    "unsupported_claim_attempt",
+    "public_context_missing_for_required_current_claim"
+  ],
+  "output_requirements": {"redact_before_log": true, "redact_before_checkpoint": true, "redact_before_artifact_write": true, "never_render_raw_pii": true}
+}

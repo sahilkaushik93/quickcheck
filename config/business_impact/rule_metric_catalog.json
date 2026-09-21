@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "undq-rule-metric-catalog",
+  "catalog_version": "1.0.0",
+  "canonical_rule_id_source": "app.execution.rule_ids.RUNTIME_TO_CANONICAL",
+  "selection_rules": {
+    "select_only_primary_metric": true,
+    "exclude_outcomes": ["not_evaluated"],
+    "exclude_null_values": true,
+    "grouped_metric_fallback": "Use a non-overlapping grouped population only if an eligible overall metric is absent; never average overall and grouped values.",
+    "unsupported_metric_behavior": "preserve_as_observation_without_score"
+  },
+  "rules": {
+    "speaker_tag_validation": {
+      "runtime_rule_ids": ["agent_speaker_tag_validation"],
+      "display_name": "Speaker Tag Validation",
+      "primary_metric": {
+        "name": "invalid_speaker_tag_rate",
+        "unit": "ratio",
+        "direction": "lower_is_better",
+        "formula_id": "lower_is_better_linear.v1",
+        "parameters": {"pass_at_or_below": 0.01, "fail_at_or_above": 0.1},
+        "threshold_source": "config/understanding/rules/agent_speaker_tag_validation.v1.json#maximum_invalid_rate",
+        "aggregation_scope": "overall_preferred"
+      }
+    },
+    "topic_drift": {
+      "runtime_rule_ids": ["topic_distribution"],
+      "display_name": "Topic Drift Validation",
+      "primary_metric": {
+        "name": "jensen_shannon_divergence",
+        "unit": "divergence",
+        "direction": "lower_is_better",
+        "formula_id": "lower_is_better_linear.v1",
+        "parameters": {"pass_at_or_below": 0.05, "fail_at_or_above": 0.15},
+        "threshold_source": "Consolidated Validation Table topic-drift thresholds",
+        "aggregation_scope": "grouped_required",
+        "notes": "JSD is produced for comparable period-pair groups. First-period and sparse groups remain not_evaluated."
+      }
+    },
+    "transcript_duration_vs_size": {
+      "runtime_rule_ids": ["speech_per_duration_rate"],
+      "display_name": "Transcript Duration vs Size",
+      "primary_metric": {
+        "name": "speech_words_per_minute",
+        "unit": "words_per_minute",
+        "direction": "inside_range",
+        "formula_id": "inside_range_linear.v1",
+        "parameters": {"warning_minimum": 30.0, "pass_minimum": 40.0, "pass_maximum": 250.0, "warning_maximum": 300.0},
+        "threshold_source": "config/understanding/rules/speech_per_duration_rate.v1.json",
+        "aggregation_scope": "overall_preferred"
+      }
+    },
+    "fill_rate": {
+      "runtime_rule_ids": ["fill_rate"],
+      "display_name": "Fill Rate Validation",
+      "primary_metric": {
+        "name": "fill_rate",
+        "unit": "ratio",
+        "direction": "higher_is_better",
+        "formula_id": "higher_is_better_linear.v1",
+        "parameters": {"fail_at_or_below": 0.7, "pass_at_or_above": 0.9},
+        "threshold_source": "config/understanding/rules/fill_rate.v1.json",
+        "aggregation_scope": "overall_preferred"
+      }
+    },
+    "non_english_mistranscription": {
+      "runtime_rule_ids": ["mistranslated_rate"],
+      "display_name": "Non-English and Mistranscription Detection",
+      "primary_metric": {
+        "name": "mistranslated_rate",
+        "unit": "matches_per_token",
+        "direction": "lower_is_better",
+        "formula_id": "lower_is_better_linear.v1",
+        "parameters": {"pass_at_or_below": 0.02, "fail_at_or_above": 0.1},
+        "threshold_source": "config/understanding/rules/mistranslated_rate.v1.json#maximum_mistranslated_rate",
+        "aggregation_scope": "overall_preferred",
+        "notes": "The LLM-enabled language classification is not yet a scoring input; unavailable semantic language observations must remain unscored."
+      }
+    },
+    "privacy_detection": {
+      "runtime_rule_ids": ["pii_detection"],
+      "display_name": "PII / Privacy Detection",
+      "primary_metric": {
+        "name": "pii_record_rate",
+        "unit": "ratio",
+        "direction": "lower_is_better",
+        "formula_id": "lower_is_better_linear.v1",
+        "parameters": {"pass_at_or_below": 0.0, "fail_at_or_above": 0.02},
+        "threshold_source": "config/understanding/rules/pii_detection.v1.json#maximum_record_rate",
+        "aggregation_scope": "overall_preferred"
+      }
+    },
+    "spelling_validation": {
+      "runtime_rule_ids": ["non_english_spelling"],
+      "display_name": "Spelling Error Rate Validation",
+      "primary_metric": {
+        "name": "unknown_token_rate",
+        "unit": "ratio",
+        "direction": "lower_is_better",
+        "formula_id": "lower_is_better_linear.v1",
+        "parameters": {"pass_at_or_below": 0.05, "fail_at_or_above": 0.2},
+        "threshold_source": "config/understanding/rules/non_english_spelling.v1.json#maximum_unknown_token_rate",
+        "aggregation_scope": "overall_preferred",
+        "notes": "Score only when the execution handler reports a non-null metric and an evaluated governed vocabulary."
+      }
+    }
+  }
+}

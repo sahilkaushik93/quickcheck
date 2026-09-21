@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "undq-trusted-insight-citation-policy",
+  "policy_version": "1.0.0",
+  "citation_requirements": {
+    "external_factual_claim_requires_verified_citation": true,
+    "minimum_verified_citations_for_completed_report": 1,
+    "minimum_verified_citations_for_regulatory_claim": 2,
+    "maximum_citations_per_claim": 5,
+    "maximum_claims_per_report": 20,
+    "citation_must_reference_connector_returned_url": true,
+    "llm_may_reference_citation_ids_only": true,
+    "reject_unknown_citation_ids": true,
+    "reject_unverified_citations": true,
+    "deduplicate_by": ["canonical_url", "content_sha256"]
+  },
+  "freshness_days_by_document_type": {
+    "filing": 1095,
+    "annual_report": 1095,
+    "earnings_release": 730,
+    "investor_presentation": 730,
+    "final_rule": 3650,
+    "proposed_rule": 1095,
+    "guidance": 1825,
+    "bulletin": 1825,
+    "policy_statement": 1825,
+    "report": 1825,
+    "press_release": 730,
+    "consumer_advisory": 1095,
+    "notice": 1825
+  },
+  "missing_publication_time": {"behavior": "allow_with_warning", "cannot_support_time_sensitive_claim": true},
+  "stale_source": {"behavior": "allow_for_historical_context_with_warning", "cannot_be_only_citation_for_current_claim": true},
+  "passage_requirements": {"minimum_passages_per_citation": 1, "maximum_passages_per_citation": 5, "maximum_passage_characters": 2000}
+}

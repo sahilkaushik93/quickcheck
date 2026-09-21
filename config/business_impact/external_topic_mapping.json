@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "mapping_id": "undq-external-topic-mapping",
+  "mapping_version": "1.0.0",
+  "purpose": "Maps canonical DQ categories to generic public research topics. Connector inputs must use these generic templates only and must not include internal observations, data values, systems, projects, column names, or metrics.",
+  "mappings": [
+    {"canonical_rule_id": "speaker_tag_validation", "condition_id": "speaker_tag_validation_degraded", "research_topics": ["consumer financial services customer service interaction analytics governance"], "preferred_source_ids": ["cfpb", "federal_reserve", "occ"]},
+    {"canonical_rule_id": "topic_drift", "condition_id": "topic_drift_significant", "research_topics": ["consumer financial services trend monitoring and data quality governance"], "preferred_source_ids": ["cfpb", "federal_reserve", "occ"]},
+    {"canonical_rule_id": "transcript_duration_vs_size", "condition_id": "duration_size_plausibility_degraded", "research_topics": ["consumer financial services operational data quality governance"], "preferred_source_ids": ["cfpb", "occ", "federal_reserve"]},
+    {"canonical_rule_id": "fill_rate", "condition_id": "fill_rate_degraded", "research_topics": ["consumer financial services data completeness governance"], "preferred_source_ids": ["cfpb", "occ", "federal_reserve"]},
+    {"canonical_rule_id": "non_english_mistranscription", "condition_id": "mistranscription_degraded", "research_topics": ["consumer financial services language access and customer communication guidance"], "preferred_source_ids": ["cfpb", "ftc"]},
+    {"canonical_rule_id": "privacy_detection", "condition_id": "privacy_detection_observed", "research_topics": ["consumer financial services privacy and sensitive information handling guidance"], "preferred_source_ids": ["cfpb", "ftc", "occ", "federal_register"]},
+    {"canonical_rule_id": "spelling_validation", "condition_id": "spelling_validation_degraded", "research_topics": ["consumer financial services record accuracy and customer communication guidance"], "preferred_source_ids": ["cfpb", "occ", "ftc"]}
+  ],
+  "fallback": {"enabled": false, "behavior": "return insufficient_external_context rather than generating arbitrary research queries"}
+}

@@ -1,3 +1,6 @@
-# Data
+# Repository documentation
 
-Place local CSV/XLSX test inputs here. Data files are intentionally ignored by Git.
+- `API_DESIGN.md`: multipart/Postman request guide and response semantics.
+- `LOGIC_GUIDE.md`: code ownership and extension points.
+
+Runnable sample inputs are under `data/input/`.

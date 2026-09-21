@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_execution_mvp",
+  "description": "Bounded-memory deterministic execution defaults for structured LUMI transcript data.",
+  "runtime": {
+    "chunk_size_rows": 10000,
+    "parallel_workers": 1,
+    "max_in_flight_chunks": 1,
+    "deterministic_merge_order": true,
+    "fail_fast": false,
+    "continue_on_rule_failure": true,
+    "llm_calls_allowed": false
+  },
+  "bounded_state": {
+    "max_aggregation_groups": 5000,
+    "max_dimensions": 3,
+    "max_cardinality_per_dimension": 500,
+    "max_categories_per_rule_group": 100,
+    "max_evidence_per_rule_group": 5,
+    "max_total_evidence": 1000,
+    "max_warning_count": 500,
+    "max_tokens_inspected_per_transcript": 10000,
+    "max_transcript_characters_inspected": 1000000
+  },
+  "evidence": {
+    "enabled": true,
+    "hash_algorithm": "sha256",
+    "hash_salt_environment_variable": "UNDQ_EVIDENCE_HASH_SALT",
+    "require_salt": true,
+    "include_raw_values": false,
+    "include_source_rows": false,
+    "include_transcript_text": false,
+    "include_pii_matches": false,
+    "redact_all_examples": true
+  },
+  "source_validation": {
+    "require_source_fingerprint_match": true,
+    "require_stable_schema": true,
+    "on_bad_lines": "warn",
+    "encoding": "utf-8",
+    "encoding_errors": "replace",
+    "delimiter": ","
+  },
+  "column_resolution": {
+    "transcript": ["trnscr_clean_read_tx", "trnscr_tx", "transcript", "transcript_text"],
+    "interaction_date": ["intrct_dt", "intrct_ts", "interaction_date", "interaction_timestamp"],
+    "interaction_direction": ["intrct_drct", "interaction_direction", "direction"],
+    "interaction_identifier": ["intrct_id", "interaction_id"],
+    "topic": ["topic_nm", "topic_ds", "topic_key_id", "topic"],
+    "duration": ["media_fl_dur_mscnd", "duration_milliseconds", "duration_seconds"],
+    "transcript_length": ["trnscr_lgth", "transcript_length"]
+  },
+  "result_policy": {
+    "include_overall": true,
+    "include_metric_availability": true,
+    "include_implementation_pending_rules": true,
+    "sort_groups_deterministically": true,
+    "round_decimal_places": 6
+  }
+}

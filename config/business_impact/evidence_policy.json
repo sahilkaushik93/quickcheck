@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "undq-business-impact-evidence-policy",
+  "policy_version": "1.0.0",
+  "internal_fact_pack": {
+    "maximum_facts": 200,
+    "maximum_normalized_evidence": 200,
+    "maximum_fact_summary_characters": 1000,
+    "maximum_evidence_summary_characters": 1000,
+    "maximum_supporting_fact_ids_per_claim": 20,
+    "allow_raw_transcript": false,
+    "allow_raw_source_row": false,
+    "allow_raw_pii_match": false,
+    "allow_internal_system_names": false,
+    "allow_sensitive_identifiers": false,
+    "required_redaction": true,
+    "overflow_behavior": "retain deterministic severity-and-provenance-prioritized items, record dropped count and set truncated=true"
+  },
+  "external_context": {
+    "maximum_research_topics": 10,
+    "maximum_retrieval_attempts": 30,
+    "maximum_documents": 40,
+    "maximum_passages": 80,
+    "maximum_passage_characters": 2000,
+    "maximum_citations": 40,
+    "maximum_citations_per_claim": 5,
+    "maximum_total_external_characters_for_llm": 30000,
+    "deduplicate_by": ["canonical_url", "content_sha256"],
+    "overflow_behavior": "retain highest trust tier then relevance score then deterministic canonical URL order"
+  },
+  "trusted_insights": {
+    "maximum_claims": 20,
+    "maximum_recommendations": 10,
+    "maximum_root_cause_candidates": 10,
+    "maximum_statement_characters": 2000,
+    "require_internal_fact_reference_for_internal_observation": true,
+    "require_external_citation_for_external_fact": true,
+    "reject_unsupported_claim": true,
+    "reject_fabricated_citation": true,
+    "mark_correlation_non_causal": true
+  },
+  "storage": {
+    "persist_full_transcript": false,
+    "persist_raw_pii": false,
+    "persist_connector_credentials": false,
+    "persist_prompts_with_sensitive_content": false,
+    "artifact_retention_mode": "compact_sanitized_only"
+  }
+}

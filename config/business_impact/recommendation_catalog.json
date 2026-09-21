@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "undq-business-impact-recommendation-catalog",
+  "catalog_version": "1.0.0",
+  "governance": {
+    "only_catalogue_recommendations_are_auto_publishable": true,
+    "llm_recommendations_outside_catalogue_require_human_review": true,
+    "recommendations_are_not_business-impact-findings": true
+  },
+  "recommendations": [
+    {
+      "catalogue_id": "rec-speaker-tag-review",
+      "condition_id": "speaker_tag_validation_degraded",
+      "title": "Review speaker-tag extraction and normalization",
+      "action": "Review approved speaker-tag patterns, expected role coverage, and transcript transformation logic; validate changes on a bounded representative sample before release.",
+      "priority": "high",
+      "owner_roles": ["data_steward", "transcript-platform-owner"],
+      "requires_human_review": false
+    },
+    {
+      "catalogue_id": "rec-topic-drift-review",
+      "condition_id": "topic_drift_significant",
+      "title": "Validate material topic-distribution change",
+      "action": "Review evaluated period and direction groups against approved topic ontology changes, routing changes, and data-coverage differences before interpreting trend movement.",
+      "priority": "medium",
+      "owner_roles": ["analytics-owner", "data-steward"],
+      "requires_human_review": false
+    },
+    {
+      "catalogue_id": "rec-duration-size-calibration",
+      "condition_id": "duration_size_plausibility_degraded",
+      "title": "Validate transcript-duration calibration",
+      "action": "Review duration-unit resolution, zero or invalid-duration handling, and transcript transformation quality for affected aggregate groups.",
+      "priority": "medium",
+      "owner_roles": ["data-engineer", "transcript-platform-owner"],
+      "requires_human_review": false
+    },
+    {
+      "catalogue_id": "rec-completeness-remediation",
+      "condition_id": "fill_rate_degraded",
+      "title": "Remediate prioritized completeness gaps",
+      "action": "Identify affected required fields, validate upstream field-population behavior, and add governed completeness monitoring for the affected coverage period or segment.",
+      "priority": "high",
+      "owner_roles": ["data-steward", "source-system-owner"],
+      "requires_human_review": false
+    },
+    {
+      "catalogue_id": "rec-transcript-lexicon-review",
+      "condition_id": "mistranscription_degraded",
+      "title": "Review transcript vocabulary and mistranscription patterns",
+      "action": "Review approved confusion lexicon coverage and transcription transformation behavior using only redacted, controlled validation material.",
+      "priority": "medium",
+      "owner_roles": ["transcript-platform-owner", "domain-steward"],
+      "requires_human_review": false
+    },
+    {
+      "catalogue_id": "rec-privacy-controlled-review",
+      "condition_id": "privacy_detection_observed",
+      "title": "Initiate controlled privacy-pattern review",
+      "action": "Route the aggregate privacy-pattern finding through the approved privacy and security review process. Do not export, display, or persist raw matched values during triage.",
+      "priority": "critical",
+      "owner_roles": ["privacy-officer", "information-security", "data-steward"],
+      "requires_human_review": true
+    },
+    {
+      "catalogue_id": "rec-spelling-quality-review",
+      "condition_id": "spelling_validation_degraded",
+      "title": "Review transcription token-quality controls",
+      "action": "Validate governed vocabulary coverage, language-handling assumptions, and transcript-cleaning behavior before using affected text for downstream classification.",
+      "priority": "medium",
+      "owner_roles": ["domain-steward", "transcript-platform-owner"],
+      "requires_human_review": false
+    }
+  ]
+}

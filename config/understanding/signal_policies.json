@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "policy_set_id": "transcript_dq_signals_mvp",
+  "description": "Deterministic policy mappings from measured transcript-quality conditions to severity, rationale and bounded remediation guidance.",
+  "evaluation": {
+    "first_matching_band_wins": true,
+    "unknown_metric_behavior": "skip_with_warning",
+    "insufficient_sample_behavior": "suppress",
+    "minimum_rows_for_rate_policy": 100,
+    "max_evidence_items_per_signal": 10,
+    "recommendations_are_advisory": true,
+    "llm_may_rephrase_recommendations": true,
+    "llm_may_change_metrics_or_severity": false,
+    "llm_output_requires_review": true
+  },
+  "policies": [
+    {
+      "policy_id": "SIG-FILL-RATE-001",
+      "check_name": "fill_rate",
+      "metric": "fill_rate",
+      "scope": "column",
+      "applicable_domains": ["*"],
+      "bands": [
+        {"operator": "lt", "value": 0.8, "severity": "critical", "signal_type": "LOW_FILL_RATE"},
+        {"operator": "lt", "value": 0.95, "severity": "high", "signal_type": "LOW_FILL_RATE"},
+        {"operator": "lt", "value": 0.99, "severity": "medium", "signal_type": "LOW_FILL_RATE"}
+      ],
+      "rationale_template": "Column {column_name} has a fill rate of {metric_value_pct}, below the expected threshold of {threshold_pct}.",
+      "recommended_actions": [
+        {"action_code": "TRACE_NULL_ORIGIN", "title": "Trace missing-value origin", "description_template": "Review upstream extraction and mapping for {column_name}; compare missingness by ingestion batch and source.", "owner_role": "Data Steward", "priority_from_signal": true},
+        {"action_code": "DEFINE_NULL_POLICY", "title": "Confirm null policy", "description_template": "Confirm whether {column_name} is mandatory for its business domain and document approved exceptions.", "owner_role": "Business Data Owner", "priority_from_signal": true}
+      ]
+    },
+    {
+      "policy_id": "SIG-TOPIC-DISTRIBUTION-001",
+      "check_name": "topic_distribution",
+      "metric": "dominant_topic_share",
+      "scope": "dataset",
+      "applicable_domains": ["conversation.topic"],
+      "bands": [
+        {"operator": "gt", "value": 0.95, "severity": "high", "signal_type": "EXTREME_TOPIC_CONCENTRATION"},
+        {"operator": "gt", "value": 0.8, "severity": "medium", "signal_type": "HIGH_TOPIC_CONCENTRATION"}
+      ],
+      "minimum_distinct_topics": 2,
+      "rationale_template": "The dominant topic represents {metric_value_pct} of classified interactions, which may indicate classification collapse, selection bias or a genuine operational concentration.",
+      "recommended_actions": [
+        {"action_code": "VALIDATE_TOPIC_PIPELINE", "title": "Validate topic classification", "description_template": "Compare the dominant topic across source, month and interaction direction before treating the concentration as a data defect.", "owner_role": "Analytics Owner", "priority_from_signal": true},
+        {"action_code": "REVIEW_TOPIC_TAXONOMY", "title": "Review topic taxonomy", "description_template": "Check whether topic aliases or fallback categories are absorbing otherwise distinct intents.", "owner_role": "Business Data Steward", "priority_from_signal": false, "priority": "medium"}
+      ]
+    },
+    {
+      "policy_id": "SIG-SPEAKER-TAG-001",
+      "check_name": "agent_speaker_tag_validation",
+      "metric": "invalid_speaker_tag_rate",
+      "scope": "column",
+      "applicable_domains": ["conversation.transcript", "conversation.speaker"],
+      "bands": [
+        {"operator": "gt", "value": 0.1, "severity": "critical", "signal_type": "INVALID_SPEAKER_TAGS"},
+        {"operator": "gt", "value": 0.03, "severity": "high", "signal_type": "INVALID_SPEAKER_TAGS"},
+        {"operator": "gt", "value": 0.01, "severity": "medium", "signal_type": "INVALID_SPEAKER_TAGS"}
+      ],
+      "rationale_template": "Invalid, missing or inconsistent speaker tags were observed at a rate of {metric_value_pct} in {column_name}.",
+      "recommended_actions": [
+        {"action_code": "COMPARE_CORRECTED_TAGS", "title": "Compare corrected transcript", "description_template": "Compare speaker structure between raw and corrected-tag transcript variants and isolate affected pipeline versions.", "owner_role": "Transcript Pipeline Owner", "priority_from_signal": true},
+        {"action_code": "VALIDATE_AGENT_MAPPING", "title": "Validate agent mapping", "description_template": "Check speaker labels against available agent identifiers and interaction direction metadata.", "owner_role": "Data Steward", "priority_from_signal": true}
+      ]
+    },
+    {
+      "policy_id": "SIG-NON-ENGLISH-001",
+      "check_name": "non_english_spelling",
+      "metric": "non_english_or_unknown_token_rate",
+      "scope": "column",
+      "applicable_domains": ["conversation.transcript"],
+      "bands": [
+        {"operator": "gt", "value": 0.2, "severity": "high", "signal_type": "HIGH_NON_ENGLISH_TOKEN_RATE"},
+        {"operator": "gt", "value": 0.05, "severity": "medium", "signal_type": "ELEVATED_NON_ENGLISH_TOKEN_RATE"}
+      ],
+      "rationale_template": "Non-English or unrecognized tokens represent {metric_value_pct} of evaluated tokens in {column_name}. This is an indicator, not proof of misspelling.",
+      "recommended_actions": [
+        {"action_code": "SEGMENT_BY_LANGUAGE", "title": "Segment by detected language", "description_template": "Separate genuine multilingual conversations from transcription errors before remediation.", "owner_role": "Language Analytics Owner", "priority_from_signal": true},
+        {"action_code": "REVIEW_UNKNOWN_TOKEN_SAMPLE", "title": "Review redacted token sample", "description_template": "Review only bounded and redacted unknown-token evidence for product names, acronyms and systematic ASR errors.", "owner_role": "Data Steward", "priority_from_signal": false, "priority": "medium"}
+      ]
+    },
+    {
+      "policy_id": "SIG-MISTRANSLATION-001",
+      "check_name": "mistranslated_rate",
+      "metric": "suspected_mistranslated_token_rate",
+      "scope": "column",
+      "applicable_domains": ["conversation.transcript"],
+      "bands": [
+        {"operator": "gt", "value": 0.1, "severity": "high", "signal_type": "HIGH_MISTRANSLATED_RATE"},
+        {"operator": "gt", "value": 0.02, "severity": "medium", "signal_type": "ELEVATED_MISTRANSLATED_RATE"}
+      ],
+      "rationale_template": "Suspected mistranslated or ASR-substituted tokens represent {metric_value_pct} of evaluated tokens in {column_name}.",
+      "recommended_actions": [
+        {"action_code": "COMPARE_TRANSCRIPT_VARIANTS", "title": "Compare transcript variants", "description_template": "Compare raw, clean and corrected transcripts using bounded aggregate error counts to locate the transformation stage introducing the issue.", "owner_role": "Transcript Pipeline Owner", "priority_from_signal": true},
+        {"action_code": "UPDATE_CONFUSION_LEXICON", "title": "Review confusion lexicon", "description_template": "Validate recurring substitutions with domain SMEs before updating the approved mistranslation lexicon.", "owner_role": "Language Analytics Owner", "priority_from_signal": true}
+      ]
+    },
+    {
+      "policy_id": "SIG-PII-001",
+      "check_name": "pii_detection",
+      "metric": "records_with_pii_rate",
+      "scope": "column",
+      "applicable_domains": ["conversation.transcript", "party.customer"],
+      "bands": [
+        {"operator": "gt", "value": 0.01, "severity": "critical", "signal_type": "PII_EXPOSURE_DETECTED"},
+        {"operator": "gt", "value": 0.001, "severity": "high", "signal_type": "PII_EXPOSURE_DETECTED"},
+        {"operator": "gt", "value": 0.0, "severity": "medium", "signal_type": "PII_EXPOSURE_DETECTED"}
+      ],
+      "rationale_template": "Potential PII patterns were detected in {metric_value_pct} of evaluated records for {column_name}. Evidence must contain only type and count, never matched values.",
+      "recommended_actions": [
+        {"action_code": "RESTRICT_AND_REMEDIATE_PII", "title": "Restrict and remediate exposure", "description_template": "Apply access controls and investigate the redaction stage using PII type counts and source lineage only.", "owner_role": "Privacy and Data Security", "priority_from_signal": true},
+        {"action_code": "VALIDATE_PII_FALSE_POSITIVES", "title": "Validate detection precision", "description_template": "Review false-positive rates using authorized masked evidence before changing detection patterns.", "owner_role": "Data Steward", "priority_from_signal": true}
+      ]
+    },
+    {
+      "policy_id": "SIG-SPEECH-DURATION-001",
+      "check_name": "speech_per_duration_rate",
+      "metric": "speech_words_per_minute",
+      "scope": "row_aggregate",
+      "applicable_domains": ["conversation.transcript", "interaction.duration"],
+      "bands": [
+        {"operator": "outside_inclusive", "lower": 30.0, "upper": 300.0, "severity": "high", "signal_type": "IMPLAUSIBLE_SPEECH_RATE"},
+        {"operator": "outside_inclusive", "lower": 60.0, "upper": 220.0, "severity": "medium", "signal_type": "UNUSUAL_SPEECH_RATE"}
+      ],
+      "minimum_valid_duration_milliseconds": 1000,
+      "rationale_template": "The aggregate speech rate of {metric_value} words per minute is outside the expected range [{lower_threshold}, {upper_threshold}].",
+      "recommended_actions": [
+        {"action_code": "VALIDATE_DURATION_UNIT", "title": "Validate duration units", "description_template": "Confirm that media duration is populated in milliseconds and is aligned to the same interaction as the transcript.", "owner_role": "Data Engineering Owner", "priority_from_signal": true},
+        {"action_code": "CHECK_TRANSCRIPT_TRUNCATION", "title": "Check transcript completeness", "description_template": "Compare transcript length, speech duration and non-speech duration aggregates for evidence of truncation or duplication.", "owner_role": "Transcript Pipeline Owner", "priority_from_signal": true}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_language_mvp",
+  "expected_language": "en",
+  "detection": {
+    "strategy": "deterministic_token_heuristic",
+    "minimum_alphabetic_tokens": 5,
+    "minimum_token_length": 3,
+    "minimum_language_confidence": 0.7,
+    "low_coverage_behavior": "unavailable",
+    "unicode_normalization": "NFKC",
+    "case_sensitive": false
+  },
+  "token_policy": {
+    "token_pattern": "[A-Za-z]+(?:['-][A-Za-z]+)*",
+    "exclude_numeric_tokens": true,
+    "exclude_urls": true,
+    "exclude_email_like_tokens": true,
+    "exclude_redaction_markers": true,
+    "exclude_single_character_tokens": true,
+    "maximum_tokens_per_transcript": 10000
+  },
+  "allowlists": {
+    "abbreviations": ["amex", "apr", "atm", "cvv", "ivr", "otp", "pin", "sms", "url"],
+    "contractions": ["can't", "couldn't", "didn't", "doesn't", "don't", "i'm", "isn't", "it's", "we're", "won't", "you'd", "you're"],
+    "load_business_glossary": true
+  },
+  "thresholds": {
+    "maximum_unknown_token_rate_default": 0.05,
+    "minimum_evaluated_tokens": 20,
+    "minimum_vocabulary_size": 500
+  },
+  "evidence": {
+    "retain_raw_tokens": false,
+    "retain_token_hashes": true,
+    "retain_category_counts": true
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "ontology_id": "lumi_transcript_domain_ontology_mvp",
+  "description": "Compact, extensible semantic ontology for LUMI/Nexidia transcript tables. It classifies by weighted evidence rather than maintaining a column-by-column dictionary.",
+  "classification": {
+    "minimum_confidence": 0.55,
+    "high_confidence": 0.8,
+    "ambiguity_margin": 0.1,
+    "unmatched_domain": "unknown",
+    "multi_label_enabled": false,
+    "llm_fallback_enabled": true,
+    "llm_fallback_max_columns_per_request": 100,
+    "llm_suggestions_require_review": true,
+    "weights": {
+      "metadata_description": 0.35,
+      "column_name": 0.3,
+      "observed_pattern": 0.2,
+      "logical_data_type": 0.1,
+      "related_columns": 0.05
+    }
+  },
+  "domains": [
+    {
+      "domain": "conversation.transcript",
+      "description": "Full or transformed conversation text and transcript summaries.",
+      "name_tokens": ["transcript", "trnscr", "utterance", "conversation", "summary", "smry"],
+      "description_phrases": ["text transcription", "cleaned transcript", "readable transcript", "summary of transcript", "utterance level"],
+      "logical_types": ["string", "json", "array"],
+      "value_hints": ["speaker labels", "long-form text", "utterance timestamps"],
+      "semantic_types": ["raw_transcript", "clean_transcript", "corrected_transcript", "transcript_summary", "utterance_timeline"],
+      "sensitivity": "potentially_sensitive",
+      "applicable_checks": ["fill_rate", "agent_speaker_tag_validation", "non_english_spelling", "mistranslated_rate", "pii_detection", "speech_per_duration_rate"]
+    },
+    {
+      "domain": "conversation.speaker",
+      "description": "Agent/customer speaker labels, agent identity and organisational attributes.",
+      "name_tokens": ["agent", "agnt", "speaker", "sprvs", "supervisor", "extension", "group"],
+      "description_phrases": ["agent identification", "agent name", "agent group", "speaker", "tagging correction"],
+      "logical_types": ["string", "integer"],
+      "value_hints": ["agent tag", "customer tag", "speaker prefix"],
+      "semantic_types": ["agent_identifier", "agent_name", "agent_group", "agent_supervisor", "speaker_tag"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate", "agent_speaker_tag_validation"]
+    },
+    {
+      "domain": "interaction.identifier",
+      "description": "Identifiers linking calls, media, workflows, batches or customer interactions.",
+      "name_tokens": ["id", "key", "xref", "reference", "execution", "workflow", "geotel", "genesys", "nice", "cmpl"],
+      "description_phrases": ["interaction identifier", "system generated id", "workflow id", "unique id", "source reference"],
+      "logical_types": ["string", "integer"],
+      "value_hints": ["high uniqueness", "stable identifier"],
+      "semantic_types": ["interaction_id", "call_id", "workflow_id", "batch_id", "source_id"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate"]
+    },
+    {
+      "domain": "party.customer",
+      "description": "Customer identifiers, membership attributes and customer-related descriptors.",
+      "name_tokens": ["customer", "cust", "cardmember", "membership", "cm15", "state"],
+      "description_phrases": ["customer identification", "card membership number", "card member", "caller"],
+      "logical_types": ["string", "integer"],
+      "value_hints": ["customer identifier", "membership number", "geographic descriptor"],
+      "semantic_types": ["customer_identifier", "membership_number", "customer_state"],
+      "sensitivity": "restricted",
+      "applicable_checks": ["fill_rate", "pii_detection"]
+    },
+    {
+      "domain": "interaction.time",
+      "description": "Interaction, ingestion and source lifecycle dates or timestamps.",
+      "name_tokens": ["date", "dt", "time", "timestamp", "ts", "updatetm", "creation"],
+      "description_phrases": ["date of the interaction", "call started", "last updated", "ingestion time", "source creation time"],
+      "logical_types": ["date", "datetime"],
+      "value_hints": ["ISO date", "ISO timestamp", "epoch timestamp"],
+      "semantic_types": ["interaction_date", "interaction_timestamp", "ingestion_timestamp", "source_timestamp", "update_timestamp"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate"]
+    },
+    {
+      "domain": "interaction.duration",
+      "description": "Media, speech, non-speech and cross-talk duration or segment measures.",
+      "name_tokens": ["duration", "dur", "mscnd", "segment", "seg", "length", "lgth"],
+      "description_phrases": ["duration in milliseconds", "total duration", "total segments", "transcription length"],
+      "logical_types": ["integer", "float", "duration"],
+      "value_hints": ["non-negative numeric", "milliseconds", "segment count"],
+      "semantic_types": ["media_duration", "speech_duration", "non_speech_duration", "cross_talk_duration", "segment_count", "transcript_length"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate", "speech_per_duration_rate"]
+    },
+    {
+      "domain": "conversation.topic",
+      "description": "Detected topics, topic identifiers, demand predictions and topic intervals.",
+      "name_tokens": ["topic", "demand", "dmnd", "intent", "category"],
+      "description_phrases": ["topic description", "topic identifier", "topic names", "predicted demand"],
+      "logical_types": ["string", "array"],
+      "value_hints": ["pipe-delimited labels", "ranked prediction", "topic interval"],
+      "semantic_types": ["topic_id", "topic_name", "topic_description", "demand_prediction"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate", "topic_distribution"]
+    },
+    {
+      "domain": "conversation.sentiment",
+      "description": "Overall, interval and transition sentiment attributes.",
+      "name_tokens": ["sentiment", "emotion", "score", "transition", "trnst"],
+      "description_phrases": ["sentiment score", "relative emotion", "quarter of the call"],
+      "logical_types": ["float", "integer", "string"],
+      "value_hints": ["bounded numeric score", "sentiment transition"],
+      "semantic_types": ["sentiment_score", "sentiment_minimum", "sentiment_maximum", "sentiment_transition", "sentiment_interval"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate"]
+    },
+    {
+      "domain": "product",
+      "description": "Product codes and business-facing product descriptions.",
+      "name_tokens": ["product", "prod", "code", "cd", "description", "ds"],
+      "description_phrases": ["product code", "product description"],
+      "logical_types": ["string"],
+      "value_hints": ["controlled code", "controlled description"],
+      "semantic_types": ["product_code", "product_description"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate"]
+    },
+    {
+      "domain": "platform.lineage",
+      "description": "LUMI ingestion, lifecycle, model and access-control metadata.",
+      "name_tokens": ["lumi", "lineage", "lifecycle", "input", "file", "oncop", "model", "source"],
+      "description_phrases": ["meta-column", "ingested", "data lifecycle", "access control", "model comments"],
+      "logical_types": ["string", "datetime", "json"],
+      "value_hints": ["file name", "pipeline metadata", "lineage reference"],
+      "semantic_types": ["input_file", "lineage", "access_control", "lifecycle_event", "model_metadata"],
+      "sensitivity": "internal",
+      "applicable_checks": ["fill_rate"]
+    }
+  ]
+}

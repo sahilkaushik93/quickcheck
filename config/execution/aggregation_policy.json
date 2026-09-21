@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_aggregation_mvp",
+  "time": {
+    "allowed_grains": ["none", "day", "week", "month", "quarter", "year"],
+    "default_grain": "month",
+    "default_timezone": "UTC",
+    "candidate_columns": ["intrct_dt", "intrct_ts", "lumi_source_creation_time", "lumi_ingestion_time", "interaction_date", "interaction_timestamp"],
+    "accepted_formats": [],
+    "invalid_timestamp_policy": "unknown_bucket",
+    "unknown_bucket_label": "__UNKNOWN_TIME__",
+    "week_starts_on": "monday",
+    "fiscal_year_start_month": 1,
+    "unknown_range_bucket_estimates": {
+      "day": 366,
+      "week": 104,
+      "month": 24,
+      "quarter": 8,
+      "year": 5
+    }
+  },
+  "dimensions": {
+    "maximum_dimensions": 3,
+    "maximum_groups": 5000,
+    "maximum_cardinality_per_dimension": 500,
+    "high_cardinality_behavior": "reject",
+    "default_null_policy": "include",
+    "null_bucket_label": "__UNKNOWN__",
+    "other_bucket_label": "__OTHER__",
+    "role_aliases": {
+      "interaction_direction": ["intrct_drct", "interaction_direction", "direction"],
+      "topic": ["topic_nm", "topic_ds", "topic_key_id", "topic"],
+      "agent_group": ["agnt_grp", "agent_group"],
+      "site": ["site_nm", "site_name", "site"],
+      "product": ["prod_cd", "prod_ds", "product_code", "product"],
+      "media": ["media_nm", "media_name", "channel"]
+    },
+    "allowed_semantic_types": ["interaction_direction", "conversation_topic", "agent_group", "site", "product", "channel", "market", "language", "categorical_dimension"],
+    "forbidden_semantic_types": ["transcript", "free_text", "customer_identifier", "interaction_identifier", "pii", "secret"],
+    "forbidden_name_patterns": ["(^|_)(transcript|trnscr|summary|smry|comment|cmnt|detail|dtl)(_|$)", "(^|_)(customer|cust|account|cardmember|member).*(_)?id$", "(^|_)(xref|reference).*(_)?id$"],
+    "sensitive_columns_allowed": false,
+    "free_text_columns_allowed": false
+  },
+  "filters": {
+    "allowed_operators": ["equals", "not_equals", "in", "not_in", "greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal", "between", "is_null", "is_not_null"],
+    "maximum_filters": 10,
+    "maximum_values_per_filter": 1000,
+    "case_sensitive_strings": false,
+    "allow_filters_on_sensitive_columns": false,
+    "allow_filters_on_free_text_columns": false
+  },
+  "include_overall_by_default": true,
+  "include_empty_groups_by_default": false
+}

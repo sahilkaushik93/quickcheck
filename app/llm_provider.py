@@ -8,9 +8,11 @@ environment variables; callers may select a provider per request.
 from __future__ import annotations
 
 import os
+import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from dotenv import load_dotenv
@@ -25,10 +27,13 @@ class LLMProviderError(RuntimeError):
 
 @dataclass(frozen=True)
 class ProviderConfig:
-    timeout_seconds: float = 60.0
+    timeout_seconds: float = 180.0
     launchpad_url: str = "http://127.0.0.1:8080/generate/single"
     ollama_url: str = "http://127.0.0.1:11434/api/generate"
     ollama_model: str = "llama3.1:8b"
+    ollama_num_ctx: int = 8192
+    ollama_num_predict: int = 700
+    ollama_keep_alive: str = "5m"
     doc_intelligence_url: str | None = None
     doc_intelligence_username: str | None = None
     doc_intelligence_password: str | None = None
@@ -36,7 +41,7 @@ class ProviderConfig:
     @classmethod
     def from_env(cls) -> "ProviderConfig":
         return cls(
-            timeout_seconds=float(os.getenv("LLM_TIMEOUT_SECONDS", "60")),
+            timeout_seconds=float(os.getenv("LLM_TIMEOUT_SECONDS", "180")),
             launchpad_url=os.getenv(
                 "LAUNCHPAD_API_URL",
                 "http://127.0.0.1:8080/generate/single",
@@ -46,6 +51,9 @@ class ProviderConfig:
                 "http://127.0.0.1:11434/api/generate",
             ),
             ollama_model=os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
+            ollama_num_ctx=int(os.getenv("OLLAMA_NUM_CTX", "8192")),
+            ollama_num_predict=int(os.getenv("OLLAMA_NUM_PREDICT", "700")),
+            ollama_keep_alive=os.getenv("OLLAMA_KEEP_ALIVE", "5m"),
             doc_intelligence_url=os.getenv("DOC_INTELLIGENCE_API_URL"),
             doc_intelligence_username=os.getenv("DOC_INTELLIGENCE_USERNAME"),
             doc_intelligence_password=os.getenv("DOC_INTELLIGENCE_PASSWORD"),
@@ -79,13 +87,31 @@ class BaseLLMProvider(ABC):
         raise NotImplementedError
 
     def _post(self, url: str, **kwargs: Any) -> dict[str, Any] | str:
+        host = (urlparse(url).hostname or "").casefold()
+        # Corporate proxy variables commonly break calls to a locally hosted
+        # Ollama/Launchpad even when the same URL works in Postman.
+        trust_env = host not in {"127.0.0.1", "localhost", "::1", "host.docker.internal"}
         try:
-            with httpx.Client(timeout=self.config.timeout_seconds) as client:
+            with httpx.Client(timeout=self.config.timeout_seconds, trust_env=trust_env) as client:
                 response = client.post(url, **kwargs)
                 response.raise_for_status()
                 return response.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            raise LLMProviderError(f"{self.name} request failed: {exc}") from exc
+        except httpx.HTTPStatusError as exc:
+            detail = exc.response.text.strip().replace("\n", " ")[:500]
+            raise LLMProviderError(
+                f"{self.name} returned HTTP {exc.response.status_code}"
+                + (f": {detail}" if detail else ".")
+            ) from exc
+        except httpx.TimeoutException as exc:
+            raise LLMProviderError(
+                f"{self.name} timed out after {self.config.timeout_seconds:g} seconds."
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise LLMProviderError(
+                f"{self.name} connection failed ({type(exc).__name__}): {exc}"
+            ) from exc
+        except ValueError as exc:
+            raise LLMProviderError(f"{self.name} returned invalid JSON.") from exc
 
 
 class LaunchpadProvider(BaseLLMProvider):
@@ -109,7 +135,14 @@ class OllamaProvider(BaseLLMProvider):
                 "model": self.model or self.config.ollama_model,
                 "prompt": prompt,
                 "stream": False,
-                "options": {"seed": _safe_seed(request_id)},
+                "format": "json",
+                "keep_alive": self.config.ollama_keep_alive,
+                "options": {
+                    "seed": _safe_seed(request_id),
+                    "temperature": 0,
+                    "num_ctx": self.config.ollama_num_ctx,
+                    "num_predict": self.config.ollama_num_predict,
+                },
             },
         )
         return _extract_text(data)
@@ -144,7 +177,8 @@ def _safe_seed(request_id: str) -> int:
     try:
         return int(request_id)
     except ValueError:
-        return abs(hash(request_id)) % (2**31)
+        digest = hashlib.sha256(request_id.encode("utf-8")).digest()
+        return int.from_bytes(digest[:4], "big") % (2**31)
 
 
 PROVIDERS: dict[str, type[BaseLLMProvider]] = {

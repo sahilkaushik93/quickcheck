@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_profiling_mvp",
+  "description": "Bounded-memory profiling defaults for structured LUMI/Nexidia transcript data.",
+  "runtime": {
+    "chunk_size_rows": 10000,
+    "max_worker_threads": 4,
+    "max_in_flight_chunks": 2,
+    "preserve_source_order": false,
+    "fail_fast_on_schema_change": true,
+    "llm_max_concurrency": 1,
+    "llm_calls_during_profiling": false
+  },
+  "csv_reader": {
+    "encoding": "utf-8",
+    "encoding_errors": "replace",
+    "delimiter": ",",
+    "quote_character": "\"",
+    "low_memory": true,
+    "skip_blank_lines": true,
+    "on_bad_lines": "warn",
+    "infer_types_from_sample_rows": 5000
+  },
+  "bounded_state": {
+    "max_distinct_values_per_column": 50000,
+    "distinct_overflow_behavior": "lower_bound",
+    "max_top_values_per_column": 20,
+    "max_safe_samples_per_column": 10,
+    "max_detected_patterns_per_column": 20,
+    "max_warnings_per_column": 20,
+    "max_evidence_items_per_signal": 10,
+    "max_relationship_pairs": 250,
+    "max_relationship_evidence_items": 5,
+    "max_profiled_string_length": 1000000,
+    "sample_storage_strategy": "redacted",
+    "store_raw_values": false,
+    "store_raw_transcripts": false
+  },
+  "statistics": {
+    "null_tokens": ["", "null", "none", "nan", "n/a", "na"],
+    "null_token_case_sensitive": false,
+    "trim_whitespace_for_null_detection": true,
+    "compute_numeric_statistics": true,
+    "numeric_algorithm": "welford",
+    "compute_string_statistics": true,
+    "compute_datetime_statistics": true,
+    "quantiles": [0.25, 0.5, 0.75, 0.95, 0.99],
+    "quantile_algorithm": "p2_streaming",
+    "numeric_parse_confidence_threshold": 0.98,
+    "datetime_parse_confidence_threshold": 0.98,
+    "boolean_parse_confidence_threshold": 0.99,
+    "minimum_non_null_values_for_type_inference": 20,
+    "duplicate_detection": {
+      "enabled": false,
+      "reason": "Exact row duplicate detection is disabled for the MVP because it requires unbounded state unless delegated to the source engine."
+    }
+  },
+  "relationship_discovery": {
+    "enabled": true,
+    "candidate_selection": "profile_and_domain_guided",
+    "minimum_non_null_pairs": 100,
+    "identifier_uniqueness_threshold": 0.995,
+    "categorical_max_distinct_ratio": 0.05,
+    "numeric_correlation_threshold": 0.8,
+    "functional_dependency_confidence_threshold": 0.98,
+    "transcript_duration_minimum_coverage": 0.8,
+    "require_review": true
+  },
+  "signal_detection": {
+    "enabled": true,
+    "minimum_rows_for_rate_signal": 100,
+    "default_fill_rate_warning": 0.95,
+    "default_fill_rate_critical": 0.8,
+    "topic_dominance_warning": 0.8,
+    "topic_other_bucket_warning": 0.3,
+    "speaker_tag_invalid_rate_warning": 0.01,
+    "non_english_token_rate_warning": 0.05,
+    "mistranslated_token_rate_warning": 0.02,
+    "pii_record_rate_warning": 0.001,
+    "speech_words_per_minute_minimum": 60.0,
+    "speech_words_per_minute_maximum": 220.0
+  },
+  "logging": {
+    "log_chunk_progress_every": 10,
+    "include_column_names": true,
+    "include_metric_values": true,
+    "include_sample_values": false,
+    "include_source_rows": false,
+    "include_transcript_text": false
+  }
+}

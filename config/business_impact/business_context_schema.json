@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "undq://business-impact/business-context/1.0.0",
+  "title": "UnDQ Business Impact Context",
+  "description": "Governed non-sensitive business context. This schema must not carry transcript content, raw identifiers, PII, credentials, internal dataset names, internal system names, metrics or control weaknesses.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["context_id", "context_schema_version"],
+  "properties": {
+    "context_id": {"type": "string", "pattern": "^context-[a-z0-9][a-z0-9_-]{2,127}$"},
+    "context_schema_version": {"type": "string", "const": "1.0"},
+    "business_capabilities": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 120}, "uniqueItems": true, "maxItems": 50},
+    "service_channels": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 80}, "uniqueItems": true, "maxItems": 25},
+    "regulated_domains": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 120}, "uniqueItems": true, "maxItems": 25},
+    "approved_impact_categories": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 120}, "uniqueItems": true, "maxItems": 50},
+    "supplied_by": {"type": "string", "minLength": 1, "maxLength": 128}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"approved_impact_categories": {"minItems": 1}}, "required": ["approved_impact_categories"]},
+      "then": {"required": ["business_capabilities"]}
+    }
+  ],
+  "x-undq-validation": {
+    "required_for_contextual_impact_mapping": ["business_capabilities", "approved_impact_categories"],
+    "when_missing": "return insufficient_context or omit contextual impact hypotheses; do not invent business context",
+    "forbidden_key_patterns": ["(?i)transcript", "(?i)raw", "(?i)pii", "(?i)password", "(?i)token", "(?i)secret", "(?i)dataset", "(?i)column", "(?i)metric", "(?i)percentage", "(?i)system"],
+    "maximum_serialized_bytes": 16384
+  }
+}

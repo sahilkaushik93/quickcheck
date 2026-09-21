@@ -1,35 +1,36 @@
-# API design
+# API and Postman guide
 
-Base path: `/api/v1/undq/transcript`
+Base path: `/api/v1/undq/transcript`.
 
-The layer endpoints and end-to-end engine reuse the same service functions. The engine does not make HTTP calls back into the application.
+## Uploaded Understanding inputs
 
-## Layered request flow
+`POST /understanding`, `/understanding/profiling`, `/understanding/rules`, and `/engine` use `multipart/form-data`. In Postman select **Body → form-data** and configure:
 
-1. `POST /understanding` accepts CSV and returns `{"understanding": ...}`.
-2. `POST /execution` accepts that JSON and returns `{"understanding": ..., "execution": ...}`.
-3. `POST /business-impact` accepts that JSON, plus optional `business_context`, and returns the complete assessment.
-4. `POST /engine` accepts CSV and performs all three steps.
+| Key | Type | Value |
+|---|---|---|
+| `sample_csv` | File | transcript/sample CSV |
+| `metadata_dictionary` | File | metadata CSV/XLSX/XLS/XLSM |
+| `rules_archive` | File | ZIP containing rule JSON files |
+| `persist_artifacts` | Text | `false` while testing |
+| `llm_enabled` | Text | `false`, or `true` for one enrichment call |
+| `llm_provider` | Text | `ollama` when enabled |
+| `llm_model` | Text | optional model override |
 
-Opening `GET /business-impact` or the versioned business-impact URL in a browser returns component health and usage guidance. Actual assessment uses `POST` with JSON.
+For loose rules, omit `rules_archive` and add the same `rule_files` key once per JSON file. Exactly one rule upload mode is required. Nested JSON files inside a ZIP are supported; unsafe paths, links, duplicate IDs and invalid schemas are rejected.
 
-## Engine response
+The response records safe provenance: original filenames, byte sizes, SHA-256 input fingerprints, rule filenames and a canonical validated registry fingerprint. Uploaded temporary files are removed after the request.
 
-```json
-{
-  "understanding": {
-    "Profile": {},
-    "Rules": {}
-  },
-  "execution": {
-    "Observed_Results": {}
-  },
-  "business_impact": {
-    "scores": {},
-    "evidences": {},
-    "impact_insights": {}
-  }
-}
-```
+## Layer flow
 
-The current implementation returns stub messages while preserving the target contract.
+1. Understanding streams the CSV, joins metadata, detects context/signals, loads the supplied registry and builds an execution plan.
+2. `POST /execution` accepts `{"understanding": ...}`.
+3. `POST /business-impact` accepts Understanding, Execution and optional business context.
+4. `/engine` accepts the same uploads and composes all three services without internal HTTP calls.
+
+`selected_rules` means the rule applies to the dataset. `execution_ready_rules` means the current Execution layer advertises the required handler. `implementation_pending_rules` are valid selected rules awaiting that handler; they are not incorrectly treated as inapplicable.
+
+## LLM diagnosis
+
+LLM enrichment is disabled unless `llm_enabled=true`. It runs once after deterministic processing and is serialized across API requests. If `llm_insights` is empty, inspect `understanding.warnings`; transport, timeout and invalid-JSON failures are reported there without exposing prompts or data. Configure Ollama with `.env`, then verify `POST http://127.0.0.1:11434/api/generate` independently.
+
+Health endpoints: `GET /health`, `GET /api/v1/undq/transcript/understanding`, `GET /api/v1/undq/transcript/engine`, and `GET /business-impact`.

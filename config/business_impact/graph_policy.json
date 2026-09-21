@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "undq-trusted-business-insight-graph-policy",
+  "policy_version": "1.0.0",
+  "execution": {
+    "maximum_graph_steps": 20,
+    "maximum_total_runtime_seconds": 120,
+    "idempotency_key": "business_impact_run_id",
+    "persist_sanitized_state_only": true,
+    "replay_behavior": "reuse_successful_retrieval_results_by_run_and_topic_hash; do_not_duplicate_artifacts"
+  },
+  "node_policies": {
+    "validate_handoff": {"timeout_seconds": 5, "max_attempts": 1},
+    "build_fact_pack": {"timeout_seconds": 10, "max_attempts": 1},
+    "research_planner": {"timeout_seconds": 5, "max_attempts": 1},
+    "retrieve_context": {"timeout_seconds": 60, "max_attempts": 2, "retryable_errors": ["timeout", "rate_limit", "transient_network"]},
+    "verify_sources": {"timeout_seconds": 15, "max_attempts": 1},
+    "map_context": {"timeout_seconds": 10, "max_attempts": 1},
+    "generate_insight": {"timeout_seconds": 90, "max_attempts": 1, "maximum_llm_calls_per_run": 1},
+    "validate_citations": {"timeout_seconds": 10, "max_attempts": 1},
+    "policy_guard": {"timeout_seconds": 5, "max_attempts": 1},
+    "human_review": {"timeout_seconds": 5, "max_attempts": 1, "interrupt": true}
+  },
+  "limits": {
+    "maximum_research_topics": 10,
+    "maximum_connectors_per_topic": 3,
+    "maximum_documents": 40,
+    "maximum_passages": 80,
+    "maximum_citations": 40,
+    "maximum_internal_facts": 200,
+    "maximum_insight_claims": 20,
+    "maximum_recommendations": 10,
+    "maximum_graph_state_bytes": 262144
+  },
+  "routing": {
+    "missing_or_invalid_handoff": "failed",
+    "insufficient_internal_fact_pack": "insufficient_context",
+    "required_external_context_unavailable": "partial",
+    "llm_failure": "partial",
+    "citation_validation_failure": "partial",
+    "human_review_triggered": "interrupt_for_review",
+    "all_validations_pass": "completed"
+  }
+}

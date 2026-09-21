@@ -1,36 +1,53 @@
-from app.models.responses import BusinessImpactRequest, BusinessImpactResult, ServiceResult
+"""API-facing service for the governed Business Impact coordinator."""
+
+from __future__ import annotations
+
+from hashlib import sha256
+
+from app.business_impact.coordinator import BusinessImpactCoordinator
+from app.business_impact.models import BusinessImpactRunRequest, LLMSelection
+from app.models.responses import BusinessImpactRequest
 
 
-def analyze_business_impact(payload: BusinessImpactRequest) -> BusinessImpactResult:
-    filename = payload.understanding.Profile.input_file
-    execution_status = payload.execution.Observed_Results.status
-    return BusinessImpactResult(
-        scores=ServiceResult(
-            message="DQ scoring service is working.",
-            input_file=filename,
-            details={
-                "result_state": "stub",
-                "execution_status_received": execution_status,
-                "llm_provider": payload.llm.provider,
-                "llm_model": payload.llm.model,
-            },
-        ),
-        evidences=ServiceResult(
-            message="DQ evidence service is working.",
-            input_file=filename,
-            details={
-                "mask_sensitive_values": True,
-                "observed_results_received": True,
-                "result_state": "stub",
-            },
-        ),
-        impact_insights=ServiceResult(
-            message="Business-impact agent API is working.",
-            input_file=filename,
-            details={
-                "business_context": payload.business_context,
-                "request_id": payload.llm.request_id,
-                "result_state": "stub",
-            },
-        ),
-    )
+class BusinessImpactServiceError(RuntimeError):
+    """Safe API-service failure with a stable code and no source-data details."""
+
+    def __init__(self, code: str, message: str) -> None:
+        self.code = code
+        self.message = message
+        super().__init__(f"{code}: {message}")
+
+
+class BusinessImpactService:
+    """Adapts the public JSON handoff to the sole Business Impact coordinator."""
+
+    def __init__(self, coordinator: BusinessImpactCoordinator) -> None:
+        self._coordinator = coordinator
+
+    def analyze(self, payload: BusinessImpactRequest):
+        """Execute only against supplied canonical outputs; never reopen a source."""
+
+        try:
+            return self._coordinator.run(
+                BusinessImpactRunRequest(
+                    run_id=_run_id(payload),
+                    understanding=payload.understanding,
+                    execution=payload.execution,
+                    business_context=payload.business_context,
+                    persist_artifacts=payload.options.persist_artifacts,
+                    llm=LLMSelection(provider=payload.llm.provider, model=payload.llm.model, request_id=payload.llm.request_id),
+                )
+            )
+        except Exception as exc:
+            raise BusinessImpactServiceError(
+                getattr(exc, "code", "BUSINESS_IMPACT_PROCESSING_FAILED"),
+                getattr(exc, "message", "Business Impact processing failed."),
+            ) from exc
+
+
+def _run_id(payload: BusinessImpactRequest) -> str:
+    seed = "|".join((payload.llm.request_id, payload.understanding.run_id, payload.execution.run_id))
+    return "impact-" + sha256(seed.encode("utf-8")).hexdigest()[:24]
+
+
+__all__ = ["BusinessImpactService", "BusinessImpactServiceError"]

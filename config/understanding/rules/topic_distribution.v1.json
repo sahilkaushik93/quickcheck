@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "topic_distribution",
+  "version": "2.0.0",
+  "check_name": "topic_distribution",
+  "title": "Topic distribution concentration",
+  "description": "Detects excessive concentration and fallback-topic dominance.",
+  "dimension": "representativeness",
+  "severity": "medium",
+  "level": "dataset",
+  "lifecycle": "approved",
+  "enabled": true,
+  "owner": "Analytics Owner",
+  "execution_handler": "topic_distribution",
+  "execution_strategy": "aggregate_distribution",
+  "selector": {"column_name_patterns": ["^(topic_(nm|ds|key_id)|dmnd_pred[12]|demand_prediction_[12]|topic)$"], "minimum_domain_confidence": 0.45, "match_mode": "any"},
+  "required_capabilities": ["profile.bounded_frequencies"],
+  "parameters": {
+    "dominant_topic_maximum": {"parameter_type": "number", "description": "Maximum acceptable dominant-topic share.", "required": true, "default": 0.8, "minimum": 0.0, "maximum": 1.0},
+    "minimum_distinct_topics": {"parameter_type": "integer", "description": "Minimum topic variety required before concentration evaluation.", "required": true, "default": 2, "minimum": 1},
+    "topic_delimiters": {"parameter_type": "string", "description": "Delimiters used to explode multi-valued topic cells.", "required": true, "default": "|;,>"}
+  },
+  "evidence_policy": {"max_evidence_items": 10, "include_aggregate_metrics": true, "include_raw_values": false, "include_transcript_text": false, "redact_matches": true},
+  "business_dimensions": ["coverage", "classification_reliability"],
+  "tags": ["mvp", "topic", "distribution"],
+  "suggested_by_llm": false,
+  "approved_by": "DQ Governance MVP"
+}

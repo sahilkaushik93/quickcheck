@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "config_id": "transcript_speaker_tags_mvp",
+  "case_sensitive": false,
+  "canonical_roles": {
+    "agent": ["agent", "advisor", "representative", "rep", "associate"],
+    "customer": ["customer", "caller", "cardmember", "card member", "user", "client"],
+    "system": ["system", "ivr", "automated message", "other"]
+  },
+  "accepted_tag_formats": [
+    "label_colon",
+    "bracketed_label",
+    "label_dash"
+  ],
+  "tag_separators": [":", "-"],
+  "validation": {
+    "required_roles": ["agent", "customer"],
+    "allow_system_only_prefix": true,
+    "allow_consecutive_same_role_turns": true,
+    "unknown_labels_are_invalid": true,
+    "empty_turns_are_invalid": true,
+    "maximum_invalid_rate_default": 0.01
+  },
+  "privacy": {
+    "retain_turn_text": false,
+    "retain_raw_labels": false,
+    "evidence_uses_failure_category_only": true
+  }
+}

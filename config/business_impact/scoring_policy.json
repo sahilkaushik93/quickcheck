@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "undq-business-impact-scoring-policy",
+  "policy_version": "1.0.0",
+  "purpose": "Deterministic technical data-quality scoring only. This policy does not calculate business loss, customer impact, regulatory exposure, or financial risk.",
+  "score_range": {"minimum": 0, "maximum": 100},
+  "selection_policy": {
+    "primary_population_preference": ["overall", "time_or_dimension_grouped"],
+    "do_not_combine_overall_and_grouped_populations": true,
+    "exclude_metric_availability": ["unavailable", "not_evaluated"],
+    "exclude_null_metric_values": true,
+    "allow_partial_metric_scoring": false,
+    "weight_renormalization": {
+      "enabled": true,
+      "only_for_available_approved_rules": true,
+      "minimum_coverage_ratio": 0.7,
+      "method": "divide each available rule weight by the sum of available approved rule weights; return null when weighted coverage is below minimum_coverage_ratio"
+    }
+  },
+  "score_bands": [
+    {"name": "excellent", "minimum_inclusive": 90},
+    {"name": "acceptable", "minimum_inclusive": 75},
+    {"name": "watch", "minimum_inclusive": 60},
+    {"name": "poor", "minimum_inclusive": 40},
+    {"name": "critical", "minimum_inclusive": 0}
+  ],
+  "normalization_formulas": {
+    "higher_is_better_linear": {
+      "formula_id": "higher_is_better_linear.v1",
+      "description": "Return 0 at or below fail_at_or_below; return 100 at or above pass_at_or_above; linearly interpolate between them.",
+      "parameters": ["fail_at_or_below", "pass_at_or_above"],
+      "boundary_behavior": "inclusive"
+    },
+    "lower_is_better_linear": {
+      "formula_id": "lower_is_better_linear.v1",
+      "description": "Return 100 at or below pass_at_or_below; return 0 at or above fail_at_or_above; linearly interpolate between them.",
+      "parameters": ["pass_at_or_below", "fail_at_or_above"],
+      "boundary_behavior": "inclusive"
+    },
+    "inside_range_linear": {
+      "formula_id": "inside_range_linear.v1",
+      "description": "Return 100 within [pass_minimum, pass_maximum]; linearly decline to 0 at warning_minimum or warning_maximum; return 0 outside that outer range.",
+      "parameters": ["warning_minimum", "pass_minimum", "pass_maximum", "warning_maximum"],
+      "boundary_behavior": "inclusive"
+    }
+  },
+  "rule_weights": {
+    "speaker_tag_validation": {
+      "weight": 0.15,
+      "rationale": "Speaker attribution is foundational to interpretation of agent/customer transcript interactions."
+    },
+    "topic_drift": {
+      "weight": 0.15,
+      "rationale": "Distribution drift affects trend comparability and downstream topic reporting."
+    },
+    "transcript_duration_vs_size": {
+      "weight": 0.1,
+      "rationale": "Transcript-duration plausibility is a supporting validity control."
+    },
+    "fill_rate": {
+      "weight": 0.15,
+      "rationale": "Completeness is a cross-cutting prerequisite for reliable analytics."
+    },
+    "non_english_mistranscription": {
+      "weight": 0.1,
+      "rationale": "Lexicon-detected mistranscription can reduce transcript interpretability."
+    },
+    "privacy_detection": {
+      "weight": 0.2,
+      "rationale": "Detected PII in transcript fields requires prominent technical visibility."
+    },
+    "spelling_validation": {
+      "weight": 0.15,
+      "rationale": "Spelling and unknown-token quality affects transcription usability when a governed vocabulary is available."
+    }
+  },
+  "validation": {
+    "require_exact_weight_sum": 1.0,
+    "weight_sum_tolerance": 0.000001,
+    "reject_unknown_canonical_rule_ids": true,
+    "reject_missing_primary_metric_catalog_entry": true
+  }
+}

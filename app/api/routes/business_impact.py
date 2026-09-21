@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request, status
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import settings
 from app.models.responses import (
@@ -6,7 +7,7 @@ from app.models.responses import (
     BusinessImpactRequest,
     ComponentStatusResponse,
 )
-from app.services.business_impact import analyze_business_impact
+from app.services.business_impact import BusinessImpactService, BusinessImpactServiceError
 
 
 router = APIRouter(prefix=settings.api_prefix, tags=["business-impact"])
@@ -16,8 +17,9 @@ browser_router = APIRouter(tags=["component-status"])
 def status_response() -> ComponentStatusResponse:
     return ComponentStatusResponse(
         component="business-impact-agent",
-        message="Business-impact agent API is healthy and ready to assess execution results.",
-        processing_method="POST",
+        status="healthy",
+        message="Business Impact accepts canonical Understanding and Execution outputs.",
+        processing_method="deterministic scoring plus governed trusted-insight graph",
     )
 
 
@@ -32,9 +34,24 @@ def business_impact_status() -> ComponentStatusResponse:
 
 
 @router.post("/business-impact", response_model=BusinessImpactEnvelope)
-async def business_impact(payload: BusinessImpactRequest) -> BusinessImpactEnvelope:
+async def business_impact(request: Request, payload: BusinessImpactRequest) -> BusinessImpactEnvelope:
+    """Run Business Impact from supplied compact contracts, never source data."""
+
+    service = getattr(request.app.state, "business_impact_service", None)
+    if not isinstance(service, BusinessImpactService):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "BUSINESS_IMPACT_NOT_CONFIGURED", "message": "Business Impact service composition is not configured."},
+        )
+    try:
+        result = await run_in_threadpool(service.analyze, payload)
+    except BusinessImpactServiceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
     return BusinessImpactEnvelope(
-        understanding=payload.understanding,
-        execution=payload.execution,
-        business_impact=analyze_business_impact(payload),
+        request_id=payload.llm.request_id,
+        status=str(result.status),
+        business_impact=result,
     )

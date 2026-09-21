@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "pii_detection",
+  "version": "2.0.0",
+  "check_name": "pii_detection",
+  "title": "PII exposure detection",
+  "description": "Detects configured PII categories and reports only redacted aggregate evidence.",
+  "dimension": "privacy",
+  "severity": "critical",
+  "level": "column",
+  "lifecycle": "approved",
+  "enabled": true,
+  "owner": "Privacy and Data Security",
+  "execution_handler": "pii_detection",
+  "execution_strategy": "streaming_row",
+  "selector": {"column_name_patterns": ["^(trnscr_(clean_read_)?tx|transcript(_text)?|add_dtl_tx)$"], "minimum_domain_confidence": 0.45, "match_mode": "any"},
+  "required_capabilities": ["execution.transcript_stream", "execution.pii_detector"],
+  "parameters": {
+    "pii_categories": {"parameter_type": "string_list", "description": "PII categories enabled for aggregate detection.", "required": true, "default": ["email", "phone", "payment_card", "us_ssn", "date_of_birth"]},
+    "maximum_record_rate": {"parameter_type": "number", "description": "Maximum acceptable records-with-PII rate.", "required": true, "default": 0.0, "minimum": 0.0, "maximum": 1.0},
+    "store_matches": {"parameter_type": "boolean", "description": "Raw PII matches must never be persisted.", "required": true, "default": false, "allowed_values": [false]}
+  },
+  "evidence_policy": {"max_evidence_items": 10, "include_aggregate_metrics": true, "include_raw_values": false, "include_transcript_text": false, "redact_matches": true},
+  "business_dimensions": ["privacy_risk", "regulatory_compliance"],
+  "tags": ["mvp", "pii", "privacy"],
+  "suggested_by_llm": false,
+  "approved_by": "DQ Governance MVP"
+}

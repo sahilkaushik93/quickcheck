@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "fill_rate",
+  "version": "2.0.0",
+  "check_name": "fill_rate",
+  "title": "Column fill rate",
+  "description": "Measures populated values as a proportion of total rows.",
+  "dimension": "completeness",
+  "severity": "high",
+  "level": "column",
+  "lifecycle": "approved",
+  "enabled": true,
+  "owner": "Data Steward",
+  "execution_handler": "fill_rate",
+  "execution_strategy": "profile_metric",
+  "selector": {"column_name_patterns": ["^(intrct_id|intrct_drct|intrct_dt|intrct_ts|trnscr_(clean_read_)?tx|media_fl_dur_mscnd|topic_(nm|ds|key_id))$"], "excluded_column_patterns": ["(_|^)(optional|comment|detail)(_|$)"], "match_mode": "any"},
+  "required_capabilities": ["profile.row_count", "profile.null_count"],
+  "parameters": {
+    "minimum_fill_rate": {"parameter_type": "number", "description": "Pass threshold from the governed validation table.", "required": true, "default": 0.90, "minimum": 0.0, "maximum": 1.0},
+    "warning_fill_rate": {"parameter_type": "number", "description": "Values above this threshold but below pass are warnings.", "required": true, "default": 0.70, "minimum": 0.0, "maximum": 1.0}
+  },
+  "evidence_policy": {"max_evidence_items": 10, "include_aggregate_metrics": true, "include_raw_values": false, "include_transcript_text": false, "redact_matches": true},
+  "business_dimensions": ["operational_readiness", "reporting_reliability"],
+  "tags": ["mvp", "completeness", "profile"],
+  "suggested_by_llm": false,
+  "approved_by": "DQ Governance MVP"
+}

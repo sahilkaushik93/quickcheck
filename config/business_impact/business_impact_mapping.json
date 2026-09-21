@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "mapping_id": "undq-business-impact-mapping",
+  "mapping_version": "1.0.0",
+  "purpose": "Maps governed technical DQ conditions to non-financial, non-causal impact hypotheses. These mappings do not assert customer harm, regulatory breach, financial loss, or operational loss.",
+  "global_rules": {
+    "require_internal_fact_ids": true,
+    "correlation_not_causation": true,
+    "do_not_generate_quantified_business_impact": true,
+    "require_human_review_for": ["critical", "privacy", "regulatory", "novel_mapping", "low_assessment_confidence"]
+  },
+  "impact_dimensions": {
+    "data_integrity": {"display_name": "Data integrity", "description": "Reliability of structured data used for analytics, reporting, and monitoring."},
+    "interaction_analytics_reliability": {"display_name": "Interaction analytics reliability", "description": "Reliability of transcript-derived interaction analysis and trend interpretation."},
+    "privacy_and_data_handling": {"display_name": "Privacy and data handling", "description": "Need for controlled review of possible sensitive-data exposure in structured transcript fields."},
+    "operational_monitoring": {"display_name": "Operational monitoring", "description": "Ability to monitor and compare operational patterns across periods or approved dimensions."},
+    "model_and_rule_input_quality": {"display_name": "Model and rule input quality", "description": "Suitability of structured transcript fields for downstream rules, models, and decision support."}
+  },
+  "conditions": [
+    {
+      "condition_id": "speaker_tag_validation_degraded",
+      "canonical_rule_id": "speaker_tag_validation",
+      "when": {"primary_metric": "invalid_speaker_tag_rate", "outcomes": ["failed", "warning"]},
+      "impact_dimensions": ["interaction_analytics_reliability", "model_and_rule_input_quality"],
+      "deterministic_classification": "speaker-attribution-quality-degraded",
+      "hypothesis_template": "Observed speaker-attribution quality issues may reduce confidence in analysis that depends on distinguishing conversation participants.",
+      "requires_human_review": false
+    },
+    {
+      "condition_id": "topic_drift_significant",
+      "canonical_rule_id": "topic_drift",
+      "when": {"primary_metric": "jensen_shannon_divergence", "outcomes": ["failed", "warning"]},
+      "impact_dimensions": ["operational_monitoring", "interaction_analytics_reliability"],
+      "deterministic_classification": "topic-distribution-change-observed",
+      "hypothesis_template": "Observed topic-distribution change may affect comparability of interaction trends across evaluated periods or approved segments.",
+      "requires_human_review": false
+    },
+    {
+      "condition_id": "duration_size_plausibility_degraded",
+      "canonical_rule_id": "transcript_duration_vs_size",
+      "when": {"primary_metric": "speech_words_per_minute", "outcomes": ["failed", "warning"]},
+      "impact_dimensions": ["data_integrity", "model_and_rule_input_quality"],
+      "deterministic_classification": "transcript-duration-plausibility-degraded",
+      "hypothesis_template": "Observed transcript-duration plausibility exceptions may reduce confidence in downstream analysis that relies on transcript size or interaction-duration relationships.",
+      "requires_human_review": false
+    },
+    {
+      "condition_id": "fill_rate_degraded",
+      "canonical_rule_id": "fill_rate",
+      "when": {"primary_metric": "fill_rate", "outcomes": ["failed", "warning"]},
+      "impact_dimensions": ["data_integrity", "operational_monitoring", "model_and_rule_input_quality"],
+      "deterministic_classification": "structured-data-completeness-degraded",
+      "hypothesis_template": "Observed structured-data completeness gaps may limit the coverage and comparability of analytics, monitoring, or downstream rule inputs.",
+      "requires_human_review": false
+    },
+    {
+      "condition_id": "mistranscription_degraded",
+      "canonical_rule_id": "non_english_mistranscription",
+      "when": {"primary_metric": "mistranslated_rate", "outcomes": ["failed", "warning"]},
+      "impact_dimensions": ["interaction_analytics_reliability", "model_and_rule_input_quality"],
+      "deterministic_classification": "transcript-lexicon-quality-degraded",
+      "hypothesis_template": "Observed suspected mistranscription patterns may reduce the reliability of transcript-derived categorization and analysis.",
+      "requires_human_review": false
+    },
+    {
+      "condition_id": "privacy_detection_observed",
+      "canonical_rule_id": "privacy_detection",
+      "when": {"primary_metric": "pii_record_rate", "outcomes": ["failed"]},
+      "impact_dimensions": ["privacy_and_data_handling", "data_integrity"],
+      "deterministic_classification": "privacy-review-required",
+      "hypothesis_template": "Observed privacy-pattern detections require controlled technical and policy review; the detection alone does not establish a breach or exposure event.",
+      "requires_human_review": true
+    },
+    {
+      "condition_id": "spelling_validation_degraded",
+      "canonical_rule_id": "spelling_validation",
+      "when": {"primary_metric": "unknown_token_rate", "outcomes": ["failed", "warning"]},
+      "impact_dimensions": ["interaction_analytics_reliability", "model_and_rule_input_quality"],
+      "deterministic_classification": "transcript-token-quality-degraded",
+      "hypothesis_template": "Observed token-quality exceptions may reduce confidence in transcript-derived keywords, classification, and analysis when governed vocabulary coverage is sufficient.",
+      "requires_human_review": false
+    }
+  ]
+}

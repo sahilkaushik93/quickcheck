@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "config_id": "mvp-domain-confusions:v1",
+  "description": "Governed POC lexicon of known ASR/domain substitutions; extend through reviewed configuration, not runtime LLM output.",
+  "case_sensitive": false,
+  "whole_word_matching": true,
+  "entries": [
+    {
+      "canonical_term": "card member",
+      "suspected_forms": ["car member", "guard member"],
+      "category": "domain_term",
+      "enabled": true
+    },
+    {
+      "canonical_term": "merchant",
+      "suspected_forms": ["merchent", "marchant"],
+      "category": "domain_term",
+      "enabled": true
+    },
+    {
+      "canonical_term": "annual fee",
+      "suspected_forms": ["annual free"],
+      "category": "domain_phrase",
+      "enabled": true
+    },
+    {
+      "canonical_term": "credit limit",
+      "suspected_forms": ["credit limb", "credit limited"],
+      "category": "domain_phrase",
+      "enabled": true
+    }
+  ],
+  "thresholds": {
+    "maximum_mistranslated_rate_default": 0.02,
+    "minimum_evaluated_tokens": 20
+  },
+  "evidence": {
+    "retain_raw_suspected_forms": false,
+    "retain_hashed_forms": true,
+    "retain_category_counts": true
+  },
+  "governance": {
+    "owner": "Language Analytics Owner",
+    "version": "1.0.0",
+    "status": "approved_for_poc",
+    "production_review_required": true,
+    "allow_runtime_llm_updates": false
+  }
+}

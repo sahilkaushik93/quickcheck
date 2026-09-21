@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "undq-assessment-confidence-policy",
+  "policy_version": "1.0.0",
+  "purpose": "Deterministic confidence in technical assessment completeness and provenance. It is not an LLM confidence score and not a probability of business impact.",
+  "formula": {
+    "formula_id": "weighted_assessment_confidence.v1",
+    "method": "weighted sum of factors after excluding factors declared unavailable; return null when contributing weight coverage is below minimum_factor_weight_coverage",
+    "minimum_factor_weight_coverage": 0.75,
+    "round_decimal_places": 4
+  },
+  "factors": {
+    "rule_coverage": {
+      "weight": 0.3,
+      "method": "sum of configured weights for completed or completed_with_warnings selected rules divided by configured weights for selected applicable rules",
+      "unavailable_when": "no applicable selected rules"
+    },
+    "metric_coverage": {
+      "weight": 0.25,
+      "method": "available approved primary metrics divided by applicable approved primary metrics, weighted by scoring policy rule weights",
+      "unavailable_when": "no approved primary metrics are applicable"
+    },
+    "evidence_coverage": {
+      "weight": 0.15,
+      "method": "min(1, retained evidence collections with provenance divided by configured minimum supporting evidence collections), subject to evidence truncation penalty",
+      "parameters": {"minimum_supporting_evidence_collections": 3, "truncation_penalty": 0.1},
+      "unavailable_when": "no evidence-producing rule is applicable"
+    },
+    "source_provenance": {
+      "weight": 0.15,
+      "method": "1 when Understanding and Execution source fingerprints, run linkage, rule registry fingerprint and source contract versions are present and consistent; 0 otherwise",
+      "unavailable_when": "required provenance contracts are absent"
+    },
+    "external_context_coverage": {
+      "weight": 0.15,
+      "method": "verified citations divided by planned required citations, capped at 1; 0 when a complete report requires external context but no verified citation is available",
+      "parameters": {"minimum_verified_citations_for_complete_report": 1},
+      "unavailable_when": "business-impact mapping declares no external context necessary"
+    }
+  },
+  "validation": {"require_exact_weight_sum": 1.0, "weight_sum_tolerance": 0.000001}
+}

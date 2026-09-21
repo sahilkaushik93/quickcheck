@@ -1,0 +1,38 @@
+{
+  "schema_version": "2.0",
+  "config_id": "lumi_transcript_dq_ontology_v2",
+  "description": "Small governed ontology used to normalize source concepts without maintaining a column-by-column dictionary.",
+  "semantic_roles": {
+    "transcript": ["trnscr_clean_read_tx", "trnscr_tx", "transcript", "transcript_text"],
+    "interaction_date": ["intrct_dt", "intrct_ts", "interaction_date", "interaction_timestamp", "lumi_source_creation_time"],
+    "interaction_direction": ["intrct_drct", "interaction_direction", "direction"],
+    "interaction_identifier": ["intrct_id", "interaction_id"],
+    "agent_name": ["agnt_nm", "agent_nm", "agent_name", "representative_name"],
+    "topic": ["topic_nm", "topic_ds", "topic_key_id", "dmnd_pred1", "dmnd_pred2", "topic"],
+    "duration": ["media_fl_dur_mscnd", "duration_milliseconds", "duration_seconds", "media_duration"],
+    "transcript_length": ["trnscr_lgth", "transcript_length"]
+  },
+  "null_like_values": ["", "null", "none", "nan", "n/a", "na", "unknown", "not available"],
+  "directions": {
+    "inbound": ["inbound", "in", "incoming", "ib"],
+    "outbound": ["outbound", "out", "outgoing", "ob"],
+    "consult": ["consult", "conference", "transfer", "internal"]
+  },
+  "speaker_roles": {
+    "agent": ["agent", "advisor", "representative", "rep", "associate"],
+    "customer": ["customer", "caller", "cardmember", "card member", "user", "client"],
+    "other": ["system", "ivr", "automated message", "other"]
+  },
+  "allowed_languages": ["English", "Spanish", "Mixed"],
+  "topic_categories": [
+    {"priority": 10, "name": "Payments", "patterns": ["payment", "pay bill", "autopay", "minimum payment"]},
+    {"priority": 20, "name": "Billing and Statements", "patterns": ["bill", "statement", "balance", "charge"]},
+    {"priority": 30, "name": "Rewards", "patterns": ["reward", "points", "membership rewards", "redeem"]},
+    {"priority": 40, "name": "Fraud and Disputes", "patterns": ["fraud", "dispute", "unauthorized", "chargeback"]},
+    {"priority": 50, "name": "Account Servicing", "patterns": ["account", "profile", "address", "contact details"]},
+    {"priority": 60, "name": "Card Servicing", "patterns": ["card", "replacement", "lost", "stolen", "activate"]},
+    {"priority": 70, "name": "Credit and Limits", "patterns": ["credit limit", "limit increase", "credit line"]},
+    {"priority": 80, "name": "Fees and Interest", "patterns": ["annual fee", "late fee", "interest", "apr"]}
+  ],
+  "fallback_topic_category": "Other"
+}
